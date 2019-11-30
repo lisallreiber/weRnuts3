@@ -1,9 +1,12 @@
 
+# needed libraries
 library(ggtextures)
 library(ggstatsplot)
+remotes::install_github("clauswilke/ggtextures")
 library(tidyverse)
 library(datenguideR)
 
+# data
 (df <- dg_call(
   nuts_nr = 1,
   stat_name = "AEW010",
@@ -24,8 +27,11 @@ library(datenguideR)
   )
 ))
 
-readr::write_csv(df, "datenguideR.csv")
+# writing the data file
+# (just because the API is not stable and sometimes returns NAs)
+# readr::write_csv(df, "datenguideR.csv")
 
+# extracting id names for each region
 df_trash <-
   dplyr::left_join(
     x = dplyr::select(df, -name),
@@ -35,21 +41,22 @@ df_trash <-
     by = "id"
   )
 
+# creating means by name and year
 df_trash %<>%
   dplyr::group_by(name, year) %>%
   dplyr::summarise(mean_trash = mean(value, na.rm = TRUE)) %>%
   dplyr::ungroup()
 
-ggplot(df_trash, aes(as.factor(year), value, color = name)) +
-  geom_jitter() + geom_path(aes(group = name)) +
-  hrbrthemes::theme_ipsum_tw()
-
+# a broad take on the data
 ggsave(
   filename = "datenGuideR.png",
   plot = ggstatsplot::ggbetweenstats(
-    df,
-    year,
-    value,
+    data = df,
+    x = year,
+    y = value,
+    title = "Trash produced by different regions in Germany",
+    xlab = "year",
+    ylab = "trash weight (tons)",
     outlier.tagging = TRUE,
     outlier.label = name,
     outlier.coef = 2.5,
@@ -62,3 +69,5 @@ ggsave(
   width = 20,
   height = 15
 )
+
+# creating a fancy visualization
