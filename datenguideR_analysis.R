@@ -1,9 +1,13 @@
 
+
 # needed libraries
 library(ggstatsplot)
 library(tidyverse)
 library(gganimate)
 library(datenguideR)
+
+# set working dir
+ggstatsplot::set_cwd()
 
 # data
 (df <- dg_call(
@@ -72,22 +76,29 @@ ggsave(
 # adding cumulative sum
 df_trash %<>%
   dplyr::group_by(name) %>%
- dplyr::mutate(cumsum = cumsum(mean_trash)) %>%
+  dplyr::mutate(cumsum = cumsum(mean_trash)) %>%
   dplyr::ungroup()
 
 # creating a fancy visualization
-ggplot(dplyr::mutate(df_trash, cumsum_mil = cumsum/100000),
-       aes(name, cumsum_mil)) +
-  geom_point(aes(color = name), size = 4) +
-  scale_y_continuous(breaks = seq(0, 3400, 200), limits = c(0, 3400)) +
-  theme_minimal() +
-  coord_flip() +
-  theme(legend.position = "none") +
-  hrbrthemes::theme_ipsum_tw() +
-  labs(title = 'Year: {frame_time}',
-       y = 'cumulative sum of trash weight (in million tons)',
-       x = 'region') +
-  transition_time(year) +
-  ease_aes('linear')
-
-anim_save(filename = "trash.gif", width= 1000, height=1000)
+gganimate::anim_save(
+  filename = paste("trash.gif"),
+  animation = ggplot(
+    dplyr::mutate(df_trash, cumsum_mil = cumsum / 100000),
+    aes(name, cumsum_mil)
+  ) +
+    geom_point(aes(color = name), size = 6) +
+    scale_y_continuous(breaks = seq(0, 3500, 500), limits = c(0, 3500)) +
+    coord_flip() +
+    ggthemes::theme_tufte() +
+    theme(legend.position = "none", text = element_text(size = 20)) +
+    guides(legend = FALSE) +
+    labs(
+      title = "How much trash does Germany accumulate over time? \nYear: {frame_time}",
+      y = "cumulative sum of trash weight (in million tons)",
+      x = "region"
+    ) +
+    transition_time(year) +
+    ease_aes("linear"),
+  width = 800,
+  height = 500
+)
