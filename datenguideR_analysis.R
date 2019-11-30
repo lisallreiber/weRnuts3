@@ -1,9 +1,8 @@
 
 # needed libraries
-library(ggtextures)
 library(ggstatsplot)
-remotes::install_github("clauswilke/ggtextures")
 library(tidyverse)
+library(gganimate)
 library(datenguideR)
 
 # data
@@ -70,4 +69,25 @@ ggsave(
   height = 15
 )
 
+# adding cumulative sum
+df_trash %<>%
+  dplyr::group_by(name) %>%
+ dplyr::mutate(cumsum = cumsum(mean_trash)) %>%
+  dplyr::ungroup()
+
 # creating a fancy visualization
+ggplot(dplyr::mutate(df_trash, cumsum_mil = cumsum/100000),
+       aes(name, cumsum_mil)) +
+  geom_point(aes(color = name), size = 4) +
+  scale_y_continuous(breaks = seq(0, 3400, 200), limits = c(0, 3400)) +
+  theme_minimal() +
+  coord_flip() +
+  theme(legend.position = "none") +
+  hrbrthemes::theme_ipsum_tw() +
+  labs(title = 'Year: {frame_time}',
+       y = 'cumulative sum of trash weight (in million tons)',
+       x = 'region') +
+  transition_time(year) +
+  ease_aes('linear')
+
+anim_save(filename = "trash.gif", width= 1000, height=1000)
