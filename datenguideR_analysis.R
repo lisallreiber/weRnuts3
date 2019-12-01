@@ -111,6 +111,11 @@ df_combined %<>%
   dplyr::mutate(cumsum = cumsum(mean_trash_std_kg)) %>%
   dplyr::ungroup()
 
+# Label
+dg_descriptions %>% 
+  filter(stat_name == "AEW010") %>% 
+  select(stat_description_full)
+
 # creating a fancy visualization
 gganimate::anim_save(
   filename = "trash.gif",
@@ -125,14 +130,18 @@ gganimate::anim_save(
     labs(
       title = "How much trash does Germany accumulate over time? 
       \n (Since 2006 to {frame_time})",
-      y = "cumulative sum of trash weight (in kilogram per capita)",
+      y = "cumulative amount of waste discharged (in kilogram per capita)",
       x = "",
-      caption = dg_descriptions %>% 
-        filter(stat_name == "AEW010") %>% 
-        select(stat_description_full)
+      caption = "Source: GENESIS-Statistik 'Erhebung der Abfallentsorgung' (32111)"
     ) +
+    scale_y_continuous(label = scales::label_number_si(unt = "kg")) +
     transition_time(year) +
     ease_aes("linear"),
   width = 800,
   height = 500
 )
+
+
+# Sources:
+#  - https://www.regionalstatistik.de/genesis/online/data;sid=1B9D622CFEA587BAE92DE292DC3AE1A8.reg2?operation=statistikLangtext&levelindex=0&levelid=1575195102089&index=1
+#  - https://www.destatis.de/DE/Methoden/Qualitaet/Qualitaetsberichte/Umwelt/abfallentsorgung.pdf?__blob=publicationFile&v=4
