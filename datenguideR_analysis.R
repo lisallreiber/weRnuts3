@@ -171,10 +171,11 @@ p_rainbow <- df_combined %>%
 # creating a fancy animated visualization
 animate(
   plot = p_rainbow,
+  renderer = gifski_renderer(loop = F),
   duration = 10,
   width = 900,
   height = 600,
-  renderer = gifski_renderer(loop = F))
+  end_pause = 50)
 
 gganimate::anim_save(
   filename = "trash_rainbow.gif",
@@ -205,16 +206,17 @@ p_emoji <- df_combined %>%
 
 
 # creating a fancy animated visualization
-animate(
+p <- animate(
   plot = p_emoji,
+  renderer = gifski_renderer(loop = F),
   duration = 10,
   width = 900,
   height = 600,
-  renderer = gifski_renderer(loop = F))
+  end_pause = 50)
 
 gganimate::anim_save(
   filename = "trash_emoji.gif",
-  animation = last_animation())
+  animation = p)
 
 
 # save
@@ -222,5 +224,7 @@ rio::export(df_combined, "data/waste.csv")
 rio::export(dg_descriptions, "data/datenguide_description.csv")
 
 # Sources:
-#  - https://www.regionalstatistik.de/genesis/online/data;sid=1B9D622CFEA587BAE92DE292DC3AE1A8.reg2?operation=statistikLangtext&levelindex=0&levelid=1575195102089&index=1
-#  - https://www.destatis.de/DE/Methoden/Qualitaet/Qualitaetsberichte/Umwelt/abfallentsorgung.pdf?__blob=publicationFile&v=4
+# - incorporate emojies: https://github.com/dill/emoGG
+# - animated plot: https://gganimate.com/
+# - https://www.regionalstatistik.de/genesis/online/data;sid=1B9D622CFEA587BAE92DE292DC3AE1A8.reg2?operation=statistikLangtext&levelindex=0&levelid=1575195102089&index=1
+# - https://www.destatis.de/DE/Methoden/Qualitaet/Qualitaetsberichte/Umwelt/abfallentsorgung.pdf?__blob=publicationFile&v=4
