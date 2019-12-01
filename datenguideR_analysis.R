@@ -124,9 +124,12 @@ gganimate::anim_save(
     guides(legend = FALSE) +
     labs(
       title = "How much trash does Germany accumulate over time? 
-      \n (Since 2006 to {frame_time}",
+      \n (Since 2006 to {frame_time})",
       y = "cumulative sum of trash weight (in kilogram per capita)",
-      x = "region"
+      x = "",
+      caption = dg_descriptions %>% 
+        filter(stat_name == "AEW010") %>% 
+        select(stat_description_full)
     ) +
     transition_time(year) +
     ease_aes("linear"),
