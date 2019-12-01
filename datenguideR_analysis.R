@@ -116,27 +116,30 @@ dg_descriptions %>%
   filter(stat_name == "AEW010") %>% 
   select(stat_description_full)
 
+# make plot
+p <- ggplot(df_combined,
+       aes(name, cumsum)
+) +
+  geom_point(aes(color = name), size = 6) +
+  coord_flip() +
+  ggthemes::theme_tufte() +
+  theme(legend.position = "none", text = element_text(size = 20)) +
+  guides(legend = FALSE) +
+  labs(
+    title = "How much trash does Germany accumulate over time? 
+      \n (Since 2006 to {frame_time})",
+    y = "cumulative amount of waste discharged (in kilogram per capita)",
+    x = "",
+    caption = "Source: GENESIS-Statistik 'Erhebung der Abfallentsorgung' (32111)"
+  ) +
+  scale_y_continuous(label = scales::label_number_si(unt = "kg")) +
+  transition_time(year) +
+  ease_aes("linear")
+
 # creating a fancy visualization
 gganimate::anim_save(
   filename = "trash.gif",
-  animation = ggplot(df_combined,
-    aes(name, cumsum)
-    ) +
-    geom_point(aes(color = name), size = 6) +
-    coord_flip() +
-    ggthemes::theme_tufte() +
-    theme(legend.position = "none", text = element_text(size = 20)) +
-    guides(legend = FALSE) +
-    labs(
-      title = "How much trash does Germany accumulate over time? 
-      \n (Since 2006 to {frame_time})",
-      y = "cumulative amount of waste discharged (in kilogram per capita)",
-      x = "",
-      caption = "Source: GENESIS-Statistik 'Erhebung der Abfallentsorgung' (32111)"
-    ) +
-    scale_y_continuous(label = scales::label_number_si(unt = "kg")) +
-    transition_time(year) +
-    ease_aes("linear"),
+  animation = p,
   width = 800,
   height = 500
 )
