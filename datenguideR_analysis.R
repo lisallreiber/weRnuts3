@@ -1,10 +1,17 @@
 
 
 # needed libraries
-library(ggstatsplot)
-library(tidyverse)
-library(gganimate)
-library(datenguideR)
+# devtools::install_github("dill/emoGG")
+
+pacman::p_load(
+               datenguideR,
+               emoGG,
+               ggstatsplot,
+               gganimate,
+               gifski, 
+               magick,
+               tidyverse)
+
 
 # set working dir
 ggstatsplot::set_cwd()
@@ -111,15 +118,40 @@ df_combined %<>%
   dplyr::mutate(cumsum = cumsum(mean_trash_std_kg)) %>%
   dplyr::ungroup()
 
+# adding cumsum17
+cumsum17 <- df_combined %>% 
+  filter(year == 2017) %>% 
+  group_by(name) %>%
+  dplyr::mutate(cumsum17 = cumsum(cumsum)) %>% 
+  ungroup() %>% 
+  select(name, cumsum17)
+
+
+# library(png)
+# img <- readPNG(system.file("img", "Rlogo.png", package="png"))
+# pic1 <- readPNG("clipart/truck.png")
+# 
+# df_truck <- tibble(name = c(1:16),
+#                        truck = list(pic1)) 
+
+
+df_combined %<>%
+  left_join(cumsum17, by = "name") 
+  
+
 # Label
 dg_descriptions %>% 
   filter(stat_name == "AEW010") %>% 
   select(stat_description_full)
 
+
+
+# Plot V1
 # make plot
-p <- ggplot(df_combined,
-       aes(name, cumsum)
-) +
+p_rainbow <- df_combined %>% 
+  mutate(name = fct_reorder(name, cumsum17)) %>% 
+  ggplot(aes(x = name, y = cumsum)) +
+  geom_col(width = 0.05) +
   geom_point(aes(color = name), size = 6) +
   coord_flip() +
   ggthemes::theme_tufte() +
@@ -136,14 +168,58 @@ p <- ggplot(df_combined,
   transition_time(year) +
   ease_aes("linear")
 
-# creating a fancy visualization
-gganimate::anim_save(
-  filename = "trash.gif",
-  animation = p,
-  width = 800,
-  height = 500
-)
+# creating a fancy animated visualization
+animate(
+  plot = p_rainbow,
+  duration = 10,
+  width = 900,
+  height = 600,
+  renderer = gifski_renderer(loop = F))
 
+gganimate::anim_save(
+  filename = "trash_rainbow.gif",
+  animation = last_animation())
+
+## plot V2
+# make plot
+p_emoji <- df_combined %>% 
+  mutate(name = fct_reorder(name, cumsum17)) %>% 
+  ggplot(aes(x = name, y = cumsum)) +
+  geom_col(width = 0.1, ) +
+  geom_emoji(emoji="1f34c") +
+  coord_flip() +
+  ggthemes::theme_tufte() +
+  theme(legend.position = "none", 
+        text = element_text(size = 20)) +
+  guides(legend = FALSE) +
+  labs(
+    title = "How much trash does Germany accumulate over time? 
+      \n (Since 2006 to {frame_time})",
+    y = "cumulative amount of waste discharged (in kilogram per capita)",
+    x = "",
+    caption = "Source: GENESIS-Statistik 'Erhebung der Abfallentsorgung' (32111)"
+  ) +
+  scale_y_continuous(label = scales::label_number_si(unt = "kg")) +
+  transition_time(year) +
+  ease_aes("linear")
+
+
+# creating a fancy animated visualization
+animate(
+  plot = p_emoji,
+  duration = 10,
+  width = 900,
+  height = 600,
+  renderer = gifski_renderer(loop = F))
+
+gganimate::anim_save(
+  filename = "trash_emoji.gif",
+  animation = last_animation())
+
+
+# save
+rio::export(df_combined, "data/waste.csv")
+rio::export(dg_descriptions, "data/datenguide_description.csv")
 
 # Sources:
 #  - https://www.regionalstatistik.de/genesis/online/data;sid=1B9D622CFEA587BAE92DE292DC3AE1A8.reg2?operation=statistikLangtext&levelindex=0&levelid=1575195102089&index=1
