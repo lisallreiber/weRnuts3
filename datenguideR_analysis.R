@@ -7,16 +7,12 @@
 pacman::p_load(
   datenguideR,
   emoGG,
-  ggstatsplot,
   gganimate,
   ggthemes,
   gifski,
   magick,
   tidyverse
 )
-
-# set working directory to the location of the script
-ggstatsplot::set_cwd()
 
 # data containing population by region
 (df_population <-
@@ -98,30 +94,6 @@ df_combined %<>%
     mean_trash_std_ton = mean_trash / population,
     mean_trash_std_kg = mean_trash_std_ton * 1000
   )
-
-
-# a broad look at the data
-# ggsave(
-#   filename = "datenGuideR.png",
-#   plot = ggstatsplot::ggbetweenstats(
-#     data = df,
-#     x = year,
-#     y = value,
-#     title = "Trash produced by different regions in Germany",
-#     xlab = "year",
-#     ylab = "trash weight (tons)",
-#     outlier.tagging = TRUE,
-#     outlier.label = name,
-#     outlier.coef = 2.5,
-#     messages = FALSE,
-#     bf.message = FALSE,
-#     ggtheme = hrbrthemes::theme_ipsum_tw(),
-#     package = "ggsci",
-#     palette = "default_igv"
-#   ),
-#   width = 20,
-#   height = 15
-# )
 
 # adding cumulative sum
 df_combined %<>%
@@ -240,7 +212,7 @@ rio::export(df_combined, "data/waste.csv")
 rio::export(dg_descriptions, "data/datenguide_description.csv")
 
 # Sources:
-# 
+#
 # - incorporate emojies: https://github.com/dill/emoGG
 # - animated plot: https://gganimate.com/
 # - data: https://www.regionalstatistik.de/genesis/online/data;sid=1B9D622CFEA587BAE92DE292DC3AE1A8.reg2?operation=statistikLangtext&levelindex=0&levelid=1575195102089&index=1
